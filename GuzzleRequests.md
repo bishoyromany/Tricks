@@ -3,7 +3,6 @@
 <?php 
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
-use GuzzleHttp\Cookie\FileCookieJar;
 class SendGuzzleRequest extends Controller
 {
     protected $request;
