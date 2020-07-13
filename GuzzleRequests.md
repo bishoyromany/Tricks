@@ -71,3 +71,27 @@ class SendGuzzleRequest extends Controller
 }
 
 ```
+## Sample Usage
+```php
+require_once __DIR__.'/SendGuzzleRequest.php';
+use SendGuzzleRequest as Http;
+
+<?php 
+    $requ = new Http([  
+        'method' => 'GET',
+        'url' => 'url here',
+        'data' => [
+            'data' => 'like any php array'
+        ],
+        'headers'   => [  
+            'API-Key'      => 'auth key here for example etc..', 
+            'Content-Type' => 'application/json'    
+        ]
+    ]);
+    $status = $requ->status();
+    $data = json_decode($requ->response());
+    $cookies = $requ->getCookies();
+    if($status != 200){
+        return 'Request Response Is Not 200!!';
+    }
+```
