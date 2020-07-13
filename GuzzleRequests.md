@@ -1,11 +1,14 @@
 # PHP Class To Use Guzzle More Easier For Sending Requests
 ```php
-<?php 
+<?php
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\ClientException;
 class SendGuzzleRequest extends Controller
 {
     protected $request;
+    protected $status;
+    protected $response;
     protected $cookies;
     public function __construct(){}
 
@@ -17,6 +20,7 @@ class SendGuzzleRequest extends Controller
             'headers' => [],
             'cookies' => [],
             'redirect' => [],
+            'handleExceptions' => true,
         ];
         $data = array_merge($defaultData, $data);
 
@@ -28,6 +32,9 @@ class SendGuzzleRequest extends Controller
                 $cookieJar = $data['cookies'];
             }else{
                 $cookieJar = new CookieJar();
+                if($cookies && is_array($data['cookies'])){
+                    $cookieJar = CookieJar::fromArray(...$data['cookies']);
+                }
             }
         }else{
             $client = new Client();
@@ -39,37 +46,53 @@ class SendGuzzleRequest extends Controller
         $request[2] = [];
         $request[2]['headers'] = $data['headers'];
 
-        if($cookies && is_array($data['cookies'])){
-            $cookieJar = CookieJar::fromArray(...$data['cookies']);
-        }
-
         if($data['method'] == 'GET'){
             $request[2]['query'] = $data['data'];
-            $this->request = $client->request(...$request);
         }elseif($data['method'] == 'POST'){
             $request[2]['form_params'] = $data['data'];
-            $request[2]['cookies'] = $cookieJar;
-            $this->request = $client->request(...$request);
+            if(isset($cookieJar)){
+                $request[2]['cookies'] = $cookieJar;
+            }
         }
 
+        if($data['handleExceptions']){
+            try{
+                $this->request = $client->request(...$request);
+            }catch(ClientException $e){
+                $e = $e->getResponse();
+                $this->status = $e->getStatusCode();
+                $this->response = $e->getBody()->getContents();
+                return $this;
+            }
+        }else{
+            $this->request = $client->request(...$request);
+        }
+        $this->status = $this->request->getStatusCode();
+        $this->response = $this->request->getBody()->getContents();
         if(isset($cookieJar)){
             $this->cookies = $cookieJar;
         }
-        
+
         return $this;
     }
 
-    public function status(){
-        return $this->request->getStatusCode();
+    public function getStatus(){
+        return $this->status;
     }
 
-    public function response(){
-        return $this->request->getBody()->getContents();
+    public function getResponse(){
+        return $this->response;
+    }
+
+    public function getRequest(){
+        return $this->request;
     }
 
     public function getCookies(){
         return $this->cookies;
     }
+}
+
 }
 
 ```
@@ -91,8 +114,8 @@ use SendGuzzleRequest as Http;
             'Content-Type' => 'application/json'    
         ]
     ]);
-    $status = $requ->status();
-    $data = json_decode($requ->response());
+    $status = $requ->getStatus();
+    $data = json_decode($requ->getResponse());
     $cookies = $requ->getCookies();
     if($status != 200){
         return 'Request Response Is Not 200!!';
