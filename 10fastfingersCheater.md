@@ -28,3 +28,5 @@ $(document).ready(() => {
 });
 
 ```
+## Usage
+Inject the Javascript Code To The Website, Then Focus On The Write Input, And Press Enter Then Space, Do The Exact Same Process To Write More Words.
