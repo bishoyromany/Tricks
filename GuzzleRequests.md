@@ -55,6 +55,8 @@ class SendGuzzleRequest extends Controller
         if(isset($cookieJar)){
             $this->cookies = $cookieJar;
         }
+        
+        return $this;
     }
 
     public function status(){
@@ -77,7 +79,8 @@ require_once __DIR__.'/SendGuzzleRequest.php';
 use SendGuzzleRequest as Http;
 
 <?php 
-    $requ = new Http([  
+    $requ = new Http();
+    $requ->send([  
         'method' => 'GET',
         'url' => 'url here',
         'data' => [
