@@ -21,6 +21,7 @@ class SendGuzzleRequest extends Controller
             'cookies' => [],
             'redirect' => [],
             'handleExceptions' => true,
+            'chunked' => false,
         ];
         $data = array_merge($defaultData, $data);
 
@@ -45,7 +46,8 @@ class SendGuzzleRequest extends Controller
         $request[1] = $data['url'];
         $request[2] = [];
         $request[2]['headers'] = $data['headers'];
-
+        $request[2]['stream'] = $data['chunked'];
+        
         if($data['method'] == 'GET'){
             $request[2]['query'] = $data['data'];
         }elseif($data['method'] == 'POST'){
